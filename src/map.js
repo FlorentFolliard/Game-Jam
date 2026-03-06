@@ -4,11 +4,11 @@ const levels = {
     // On définit les rectangles de collision UNIQUEMENT là où les pieds 
     // du personnage ne doivent pas passer.
     walls: [
-      { x: 0, y: 40, w: 800, h: 20 },   // Base du mur Nord (on laisse un peu de visuel au dessus)
-      { x: 0, y: 580, w: 800, h: 20 },  // Base du mur Sud
-      { x: 0, y: 0, w: 20, h: 600 },    // Mur Ouest
-      { x: 780, y: 0, w: 20, h: 600 },  // Mur Est
-      { x: 300, y: 250, w: 200, h: 30 } // Un mur interne (ex: un comptoir ou muret)
+      { x: 0, y: 0, w: 900, h: 64 },   //  Mur Nord
+      { x: 515, y: 0, w: 62, h: 420 },  // mur milieu/haut 1
+      { x: 516, y: 240, w: 190, h: 182 },    // mur milieu/haut 2
+      { x:0, y:0, w:1, h:600}  //Mur invisible gauche
+      // Un mur interne (ex: un comptoir ou muret)
     ]
   }
 };
