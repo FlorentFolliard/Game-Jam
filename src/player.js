@@ -1,15 +1,16 @@
 let player = {
-  x: 0,
-  y: 0,
+  x: 300,
+  y: 300,
   w: 48, 
   h: 48, 
-  speed: 4,
+  speed: 2.5,
   
   // Animation
   sprites: [],      // Contiendra [img1, img2]
   frameIndex: 0,    // 0 ou 1 (quelle image afficher)
   animTimer: 0,     // Compteur pour ralentir l'animation
   isMoving: false,  // On n'anime que si le canard avance
+  facingLeft: false, // true si le joueur regarde à gauche
 
   update: function() {
     let nextX = this.x;
@@ -17,13 +18,13 @@ let player = {
     this.isMoving = false; // Par défaut, on ne bouge pas
 
     // Détection des touches
-    if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) { nextX -= this.speed; this.isMoving = true; }
-    if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) { nextX += this.speed; this.isMoving = true; }
+    if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) { nextX -= this.speed; this.isMoving = true; this.facingLeft = true; }
+    if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) { nextX += this.speed; this.isMoving = true; this.facingLeft = false; }
     if (keyIsDown(UP_ARROW) || keyIsDown(87)) { nextY -= this.speed; this.isMoving = true; }
     if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) { nextY += this.speed; this.isMoving = true; }
 
     // Collision aux pieds
-    if (!this.checkWallCollision(nextX, nextY + 35, this.w, 12)) {
+    if (!this.checkWallCollision(nextX + 6, nextY + 39, 36, 8)) {
       this.x = nextX;
       this.y = nextY;
     }
@@ -52,11 +53,17 @@ let player = {
   draw: function() {
     // On dessine l'image correspondante à l'index actuel (0 ou 1)
     if (this.sprites.length > 0) {
-      image(this.sprites[this.frameIndex], this.x, this.y, this.w, this.h);
+      push();
+      translate(this.x + this.w / 2, this.y + this.h / 2);
+      if (this.facingLeft) {
+        scale(-1, 1); // Flip horizontal
+      }
+      image(this.sprites[this.frameIndex], -this.w / 2, -this.h / 2, this.w, this.h);
+      pop();
     }
     
     // Debug collision (pieds)
     fill(255, 255, 0, 100);
-    rect(this.x, this.y + 35, this.w, 12);
+    rect(this.x + 6, this.y + 39, 36, 8);
   }
 };
