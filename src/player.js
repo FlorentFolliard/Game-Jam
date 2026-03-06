@@ -4,6 +4,8 @@ let player = {
   w: 48, 
   h: 48, 
   speed: 2.5,
+  hp: 3,
+  hpmax: 3,
   
   // Animation
   sprites: [],      // Contiendra [img1, img2]
@@ -23,9 +25,11 @@ let player = {
     if (keyIsDown(UP_ARROW) || keyIsDown(87)) { nextY -= this.speed; this.isMoving = true; }
     if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) { nextY += this.speed; this.isMoving = true; }
 
-    // Collision aux pieds
-    if (!this.checkWallCollision(nextX + 6, nextY + 39, 36, 8)) {
+    // Collision aux pieds - Vérifier X et Y séparément pour permettre le glissement
+    if (!this.checkWallCollision(nextX + 6, this.y + 39, 36, 8)) {
       this.x = nextX;
+    }
+    if (!this.checkWallCollision(this.x + 6, nextY + 39, 36, 8)) {
       this.y = nextY;
     }
 
