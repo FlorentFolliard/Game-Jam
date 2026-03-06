@@ -1,6 +1,6 @@
 const levels = {
   room1: {
-    imagePath: 'Asset/Map/map.png',
+    imagePath: 'assets/map/map.png',
     // On définit les rectangles de collision UNIQUEMENT là où les pieds 
     // du personnage ne doivent pas passer.
     walls: [
@@ -11,8 +11,8 @@ const levels = {
       { x:65, y:178, w:297, h:113}, //mur milieu gauche 1
       { x:302, y:180, w:60, h:305}, //mur milieu gauche 2
       { x:366, y:0, w:60, h:95}, //muret nord
-      { x:732, y:130, w:170, h:63},
-      { x:732, y:453, w:170, h:100},
+      { x:732, y:130, w:170, h:63}, //muret est 1
+      { x:732, y:453, w:170, h:100}, //muret est 2
     ]
   }
 };

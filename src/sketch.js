@@ -2,8 +2,8 @@ function preload() {
   loadLevel("room1"); 
   
   // On charge les deux PNG du canard
-  player.sprites[0] = loadImage('./Asset/Personnage/Canards/duck1/d1p1.png');
-  player.sprites[1] = loadImage('./Asset/Personnage/Canards/duck1/d1p2.png');
+  player.sprites[0] = loadImage('./assets/personnage/Canards/duck1/d1p1.png');
+  player.sprites[1] = loadImage('./assets/personnage/Canards/duck1/d1p2.png');
 }
 
 function setup() {
