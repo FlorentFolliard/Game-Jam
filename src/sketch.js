@@ -29,6 +29,6 @@ function draw() {
 function showCoords() {
   fill(255, 0, 180, 100);
   noStroke();
-  textSize(20);
+  textSize(12);
   text(`X: ${floor(mouseX)} Y: ${floor(mouseY)}`, width - 100, height - 20);
 }
