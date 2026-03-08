@@ -4,6 +4,9 @@ function preload() {
   // On charge les deux PNG du canard
   player.sprites[0] = loadImage('./assets/personnage/Canards/duck1/d1p1.png');
   player.sprites[1] = loadImage('./assets/personnage/Canards/duck1/d1p2.png');
+  
+  // Créer le mushroom enemy
+  createMushroomEnemy(450, 300);
 }
 
 function setup() {
@@ -18,6 +21,12 @@ function draw() {
   // On gère le joueur
   player.update();
   player.draw();
+  
+  // On gère les ennemis
+  if (mushroomEnemy) {
+    mushroomEnemy.update();
+    mushroomEnemy.draw();
+  }
 
   // On affiche les murs de collision (à masquer pour le rendu final)
   drawWalls();

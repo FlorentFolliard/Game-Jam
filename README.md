@@ -4,8 +4,11 @@
 FOLLIARD Florent
 VIVIEN Oscar
 
-### https://flx8.itch.io/game-jam-des-bg
-## Structure du projet
+Retrouvez notre jeu sur [Itch.io](https://flx8.itch.io/game-jam-des-bg)
+
+
+<details>
+<summary> Arborescence structurelle du projet 📂</summary>
 
 ```
 assets/
@@ -53,3 +56,4 @@ index.html
 README.md
 style.css
 ```
+</details>
