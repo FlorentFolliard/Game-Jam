@@ -9,6 +9,7 @@ body {
     background:
         radial-gradient(circle at top, #4f6076 0%, #263342 45%, #161d25 100%);
     color: #f2f5eb;
+    overflow: hidden; /* Empêche le scroll si le screamer s'affiche */
 }
 
 /* --- ÉCRAN D'ACCUEIL --- */
@@ -38,11 +39,6 @@ body {
     text-transform: uppercase;
 }
 
-.home-subtitle {
-    margin: 10px 0 28px;
-    color: #dde7cc;
-}
-
 .play-button {
     border: 0;
     background: transparent;
@@ -53,10 +49,6 @@ body {
 
 .play-button:hover {
     transform: translateY(-2px) scale(1.02);
-}
-
-.play-button:active {
-    transform: scale(0.98);
 }
 
 .play-button img {
@@ -80,7 +72,7 @@ body {
 }
 
 .game-container {
-    position: relative; /* INDISPENSABLE pour que les HP se fixent ici */
+    position: relative;
     display: inline-block;
 }
 
@@ -92,27 +84,24 @@ body {
 }
 
 /* --- BARRE DE VIE (HP) --- */
+.game-container {
+    position: relative; /* Indispensable pour garder les coeurs à l'intérieur */
+    display: inline-block; 
+    line-height: 0;     /* Supprime les espaces fantômes sous le canvas */
+}
+
 .hp-bar {
     position: absolute;
-    top: 10px;      /* Ajuste pour monter/descendre dans le coin bleu */
-    left: 10px;     /* Ajuste pour aller à gauche/droite dans le coin bleu */
+    top: 10px;          /* Ajuste pour coller au coin bleu */
+    left: 10px;
     display: flex;
-    gap: 8px;       /* Espace entre les points de vie */
-    z-index: 100;   /* Pour passer devant le canvas */
+    gap: 8px;
+    z-index: 1000;      /* Force l'affichage par dessus tout */
+    pointer-events: none; /* Empêche les clics sur les coeurs de bloquer le jeu */
 }
 
 .hp-point {
-    /* --- TAILLE RÉDUITE --- */
-    width: 40px;    /* J'ai réduit ici (anciennement 60px) */
+    width: 40px; 
     height: auto;
-    
-    image-rendering: pixelated; 
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-}
-
-/* Optionnel : Ajuste aussi la taille sur mobile si besoin */
-@media (max-width: 960px) {
-    .hp-point {
-        width: 30px; 
-    }
+    image-rendering: pixelated;
 }
