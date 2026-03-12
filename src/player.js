@@ -18,16 +18,32 @@ let player = {
   attackSprite: null,
   isAttacking: false,
   attackTimer: 0,
-  attackDuration: 30, // 30 frames = 0.5s à 60fps
+  attackHitboxDuration: 6, // 6 frames = 0.1s @ 60fps
+  attackVisualDuration: 12, // 12 frames = 0.2s @ 60fps
+  attackCooldown: 60, // 60 frames = 1s @ 60fps
+  attackCooldownTimer: 0,
   lastDirection: 'right', // 'left' ou 'right' ou 'up' ou 'down'
+  attackDirection: 'right',
+  attackStartX: null,
+  attackStartY: null,
   attackHitbox: null,
 
   attack: function() {
-    if (this.isAttacking) return; // pas de spam instantané (peut être ajusté)
+    if (this.isAttacking || this.attackCooldownTimer > 0) return;
     this.isAttacking = true;
     this.attackTimer = 0;
-    // on conserve la direction précédente pour l'attaque
+    this.attackCooldownTimer = this.attackCooldown;
+
+    // On fixe direction et position d'attaque dès le départ
+    this.attackDirection = this.lastDirection;
+    this.attackStartX = this.x;
+    this.attackStartY = this.y;
+
+    // on conserve la direction précédente pour l'attaque visuelle
     this.facingLeft = (this.lastDirection === 'left');
+
+    // on initialise la hitbox d'attaque qui ne bougera plus
+    this.attackHitbox = this.getAttackHitbox();
   },
 
   handleKey: function(k, kc) {
@@ -103,13 +119,26 @@ let player = {
     }
 
     // Compteur d'attaque
+    if (this.attackCooldownTimer > 0) {
+      this.attackCooldownTimer--;
+    }
+
     if (this.isAttacking) {
       this.attackTimer++;
-      if (this.attackTimer >= this.attackDuration) {
+
+      if (this.attackTimer <= this.attackHitboxDuration) {
+        this.attackHitbox = this.getAttackHitbox();
+      } else {
+        this.attackHitbox = null;
+      }
+
+      if (this.attackTimer >= this.attackVisualDuration) {
         this.isAttacking = false;
         this.attackTimer = 0;
+        this.attackStartX = null;
+        this.attackStartY = null;
+        this.attackDirection = this.lastDirection;
       }
-      this.attackHitbox = this.getAttackHitbox();
     } else {
       this.attackHitbox = null;
     }
@@ -123,25 +152,25 @@ let player = {
   },
 
   getAttackHitbox: function() {
-    if (!this.isAttacking) return null;
+    if (!this.isAttacking || this.attackStartX === null || this.attackStartY === null) return null;
 
     let size = this.w * 0.8;
     let offsetX = 0;
     let offsetY = 0;
 
-    if (this.lastDirection === 'left') {
+    if (this.attackDirection === 'left') {
       offsetX = -this.w;
-    } else if (this.lastDirection === 'right') {
+    } else if (this.attackDirection === 'right') {
       offsetX = this.w;
-    } else if (this.lastDirection === 'up') {
+    } else if (this.attackDirection === 'up') {
       offsetY = -this.h;
-    } else if (this.lastDirection === 'down') {
+    } else if (this.attackDirection === 'down') {
       offsetY = this.h;
     }
 
     return {
-      x: this.x + offsetX + (this.w - size) / 2,
-      y: this.y + offsetY + (this.h - size) / 2,
+      x: this.attackStartX + offsetX + (this.w - size) / 2,
+      y: this.attackStartY + offsetY + (this.h - size) / 2,
       w: size,
       h: size
     };
@@ -159,38 +188,38 @@ let player = {
       pop();
     }
 
-    // Si on attaque, on dessine l'attaque en offset par rapport à la dernière direction
-    if (this.isAttacking) {
+    // Si on attaque, on dessine l'attaque en offset par rapport à la position / direction de départ
+    if (this.isAttacking && this.attackStartX !== null && this.attackStartY !== null) {
       let offsetX = 0;
       let offsetY = 0;
       let attackW = this.w;
       let attackH = this.h;
       let angle = 0; // en degrés
 
-      if (this.lastDirection === 'left') {
+      if (this.attackDirection === 'left') {
         offsetX = -this.w;
         angle = 270;
-      } else if (this.lastDirection === 'right') {
+      } else if (this.attackDirection === 'right') {
         offsetX = this.w;
         angle = 90;
-      } else if (this.lastDirection === 'up') {
+      } else if (this.attackDirection === 'up') {
         offsetY = -this.h;
         angle = 0;
-      } else if (this.lastDirection === 'down') {
+      } else if (this.attackDirection === 'down') {
         offsetY = this.h;
         angle = 180;
       }
 
       if (this.attackSprite) {
         push();
-        translate(this.x + this.w / 2 + offsetX, this.y + this.h / 2 + offsetY);
+        translate(this.attackStartX + this.w / 2 + offsetX, this.attackStartY + this.h / 2 + offsetY);
         rotate(radians(angle));
         image(this.attackSprite, -attackW / 2, -attackH / 2, attackW, attackH);
         pop();
       } else {
         // dessin de fallback rouge semi-translucide
         push();
-        translate(this.x + this.w / 2 + offsetX, this.y + this.h / 2 + offsetY);
+        translate(this.attackStartX + this.w / 2 + offsetX, this.attackStartY + this.h / 2 + offsetY);
         rotate(radians(angle));
         noFill();
         stroke(255, 70, 70);
@@ -211,6 +240,22 @@ let player = {
       stroke(0, 200, 255);
       strokeWeight(2);
       rect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.w, this.attackHitbox.h);
+    }
+
+    // Barre de cooldown d'attaque au-dessus du joueur
+    if (this.attackCooldownTimer > 0) {
+      const barW = this.w;
+      const barH = 6;
+      const pct = 1 - this.attackCooldownTimer / this.attackCooldown;
+      const fillW = barW * pct;
+      noStroke();
+      fill(50, 50, 50, 200);
+      rect(this.x, this.y - 12, barW, barH);
+      fill(0, 200, 0, 220);
+      rect(this.x, this.y - 12, fillW, barH);
+      stroke(255);
+      noFill();
+      rect(this.x, this.y - 12, barW, barH);
     }
   }
 };

@@ -14,6 +14,7 @@ function preload() {
       player.attackSprite = null;
     }
   );
+
   // Créer le mushroom enemy
   createMushroomEnemy(450, 300);
 }
@@ -46,10 +47,26 @@ function draw() {
     mushroomEnemy.update();
     mushroomEnemy.draw();
 
+    // --- TEST DE COLLISION ATTAQUE ---
+    // On vérifie si la hitbox d'attaque du joueur touche la hitbox de l'ennemi
+    if (player.attackHitbox && rectCollide(
+      player.attackHitbox.x,
+      player.attackHitbox.y,
+      player.attackHitbox.w,
+      player.attackHitbox.h,
+      mushroomEnemy.x,
+      mushroomEnemy.y,
+      mushroomEnemy.w,
+      mushroomEnemy.h
+    )) {
+      console.log('Ennemi touché ! Il est tué.');
+      mushroomEnemy = null; // on le supprime
+    }
+
     // --- TEST DE COLLISION MORTELLE ---
     // On vérifie si l'ennemi touche le joueur
     // Note : On passe l'objet 'player' entier
-    if (mushroomEnemy.collidesWith(player)) {
+    if (mushroomEnemy && mushroomEnemy.collidesWith(player)) {
       handleGameOver();
     }
   }
