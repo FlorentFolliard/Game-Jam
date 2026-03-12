@@ -104,12 +104,12 @@ class Enemy {
   }
 }
 
-let mushroomEnemy = null;
+let mushroomEnemies = [];
 
 // --- FONCTION DE CRÉATION MISE À JOUR ---
 function createMushroomEnemy(x, y) {
-  mushroomEnemy = new Enemy(x, y, 48, 48, 36, 8, 6, 39);
-  mushroomEnemy.speed = 0.5;
+  const enemy = new Enemy(x, y, 48, 48, 36, 8, 6, 39);
+  enemy.speed = 0.5;
 
   // On charge la planche de 4 images et on la découpe
   loadImage('./assets/personnage/Mushroom/sprite/cute mushroom walk.png', (sheet) => {
@@ -117,9 +117,19 @@ function createMushroomEnemy(x, y) {
     let sh = 48; // Hauteur d'une frame
     
     for (let i = 0; i < 4; i++) {
-      mushroomEnemy.sprites[i] = sheet.get(i * sw, 0, sw, sh);
+      enemy.sprites[i] = sheet.get(i * sw, 0, sw, sh);
     }
   });
 
-  return mushroomEnemy;
+  mushroomEnemies.push(enemy);
+  return enemy;
+}
+
+function clearMushroomEnemies() {
+  mushroomEnemies = [];
+}
+
+function spawnMushroomSwarm(coordsArray) {
+  clearMushroomEnemies();
+  coordsArray.forEach(([x, y]) => createMushroomEnemy(x, y));
 }

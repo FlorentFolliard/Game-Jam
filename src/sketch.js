@@ -8,6 +8,15 @@ let gameOverDuckFrameIndex = 0;
 let gameOverDuckAnimTimer = 0;
 const mushroomStartX = 450;
 const mushroomStartY = 300;
+const mushroomSwarmOffsets = [
+  [-300, -200],
+  [0, 0],
+  [300, -0]
+];
+
+function getMushroomSpawnCoords() {
+  return mushroomSwarmOffsets.map(([dx, dy]) => [mushroomStartX + dx, mushroomStartY + dy]);
+}
 
 function preload() {
   loadLevel("room1"); 
@@ -54,8 +63,6 @@ function preload() {
     console.warn('Erreur création du son de canard:', e);
     player.quackSound = null;
   }
-
-  createMushroomEnemy(mushroomStartX, mushroomStartY);
 }
 
 function setup() {
@@ -72,9 +79,7 @@ function draw() {
 
   if (gameOver) {
     player.draw();
-    if (mushroomEnemy) {
-      mushroomEnemy.draw();
-    }
+    mushroomEnemies.forEach((enemy) => enemy.draw());
     drawWalls();
     drawGameOverScreen();
     return;
@@ -89,22 +94,25 @@ function draw() {
   
   player.update();
   
-  if (mushroomEnemy) {
-    mushroomEnemy.update();
-    mushroomEnemy.draw();
+  for (let i = mushroomEnemies.length - 1; i >= 0; i--) {
+    const enemy = mushroomEnemies[i];
+    enemy.update();
+    enemy.draw();
 
     // --- COLLISION ATTAQUE ---
     if (player.attackHitbox && rectCollide(
       player.attackHitbox.x, player.attackHitbox.y, player.attackHitbox.w, player.attackHitbox.h,
-      mushroomEnemy.x, mushroomEnemy.y, mushroomEnemy.w, mushroomEnemy.h
+      enemy.x, enemy.y, enemy.w, enemy.h
     )) {
       console.log('Ennemi tué !');
-      mushroomEnemy = null; 
+      mushroomEnemies.splice(i, 1);
+      continue;
     }
 
     // --- COLLISION : LE JOUEUR EST TOUCHÉ (Seulement si non invincible) ---
-    if (mushroomEnemy && mushroomEnemy.collidesWith(player) && !isInvincible) {
+    if (enemy.collidesWith(player) && !isInvincible) {
       takeDamage();
+      // continue (le joueur peut être touché par plusieurs en même temps, bonne gestion selon ton design)
     }
   }
 
@@ -155,7 +163,7 @@ function restartGame() {
   updateUI();
   player.x = 180;
   player.y = 330;
-  createMushroomEnemy(mushroomStartX, mushroomStartY);
+  spawnMushroomSwarm(getMushroomSpawnCoords());
   isInvincible = false;
   gameOver = false;
   duckScrollX = -64;
@@ -253,7 +261,7 @@ function startGame() {
     screen.setAttribute('aria-hidden', 'true');
   }
 
-  createMushroomEnemy(mushroomStartX, mushroomStartY);
+  spawnMushroomSwarm(getMushroomSpawnCoords());
   gameOver = false;
   duckScrollX = -64;
   gameOverDuckFrameIndex = 0;
