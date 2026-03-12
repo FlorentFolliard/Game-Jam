@@ -1,6 +1,6 @@
 const levels = {
   room1: {
-    imagePath: 'assets/map/map.png',
+    imagePath: 'assets/map/IMG_2516.jpg',
     // On définit les rectangles de collision UNIQUEMENT là où les pieds 
     // du personnage ne doivent pas passer.
     walls: [
