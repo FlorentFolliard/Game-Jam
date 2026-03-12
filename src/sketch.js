@@ -59,3 +59,7 @@ function showCoords() {
   textSize(12);
   text(`X: ${floor(mouseX)} Y: ${floor(mouseY)}`, width - 100, height - 20);
 }
+
+function keyPressed() {
+  player.handleKey(key, keyCode);
+}
