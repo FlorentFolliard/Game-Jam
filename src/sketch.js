@@ -6,6 +6,8 @@ let duckScrollX = 0;
 let gameOverDuckFrames = [];
 let gameOverDuckFrameIndex = 0;
 let gameOverDuckAnimTimer = 0;
+const mushroomStartX = 450;
+const mushroomStartY = 300;
 
 function preload() {
   loadLevel("room1"); 
@@ -53,7 +55,7 @@ function preload() {
     player.quackSound = null;
   }
 
-  createMushroomEnemy(450, 300);
+  createMushroomEnemy(mushroomStartX, mushroomStartY);
 }
 
 function setup() {
@@ -139,6 +141,12 @@ function handleGameOver() {
   duckScrollX = -64;
   gameOverDuckFrameIndex = 0;
   gameOverDuckAnimTimer = 0;
+
+  const screen = document.getElementById('game-over-screen');
+  if (screen) {
+    screen.classList.add('active');
+    screen.setAttribute('aria-hidden', 'false');
+  }
 }
 
 // Fonction pour recommencer (à appeler via le bouton du Game Over)
@@ -147,6 +155,7 @@ function restartGame() {
   updateUI();
   player.x = 180;
   player.y = 330;
+  createMushroomEnemy(mushroomStartX, mushroomStartY);
   isInvincible = false;
   gameOver = false;
   duckScrollX = -64;
@@ -154,7 +163,10 @@ function restartGame() {
   gameOverDuckAnimTimer = 0;
   
   const screen = document.getElementById('game-over-screen');
-  if(screen) screen.classList.remove('active');
+  if (screen) {
+    screen.classList.remove('active');
+    screen.setAttribute('aria-hidden', 'true');
+  }
   
   gameStarted = true;
   loop();
@@ -234,6 +246,14 @@ function startGame() {
     gameWrapper.classList.add('active');
     gameWrapper.setAttribute('aria-hidden', 'false');
   }
+
+  const screen = document.getElementById('game-over-screen');
+  if (screen) {
+    screen.classList.remove('active');
+    screen.setAttribute('aria-hidden', 'true');
+  }
+
+  createMushroomEnemy(mushroomStartX, mushroomStartY);
   gameOver = false;
   duckScrollX = -64;
   gameOverDuckFrameIndex = 0;

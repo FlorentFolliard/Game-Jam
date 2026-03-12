@@ -25,15 +25,12 @@
                 <img src="assets/hp/hpP.png" class="hp-point">
                 <img src="assets/hp/hpP.png" class="hp-point">
             </div>
-            
-            </div>
-    </section>
 
-    <div id="game-over-screen">
-        <img src="assets/GameOver/♥️♥️.jpg" id="screamer-img" alt="Screamer">
-        <div class="game-over-text">GAME OVER</div>
-        <button class="retry-button" onclick="restartGame()">RÉESSAYER</button>
-    </div>
+            <div id="game-over-screen" class="game-over-screen" aria-hidden="true">
+                <button class="retry-button" type="button" onclick="restartGame()">REESSAYER</button>
+            </div>
+        </div>
+    </section>
 
     <script src="src/collisions.js"></script>
     <script src="src/map.js"></script>
