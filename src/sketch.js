@@ -1,6 +1,11 @@
 let gameStarted = false;
 let health = 3;
 let isInvincible = false; // Pour empêcher de perdre tous ses PV d'un coup
+let gameOver = false;
+let duckScrollX = 0;
+let gameOverDuckFrames = [];
+let gameOverDuckFrameIndex = 0;
+let gameOverDuckAnimTimer = 0;
 
 function preload() {
   loadLevel("room1"); 
@@ -12,6 +17,16 @@ function preload() {
     let lineY = 32; 
     for (let i = 0; i < 6; i++) {
       player.sprites[i] = sheet.get(i * sw, lineY, sw, sh);
+    }
+  });
+
+  loadImage('./assets/personnage/Canards/ducky_2_spritesheet.png', (sheet) => {
+    let sw = 32;
+    let sh = 32;
+    let gameOverLineY = 96;
+
+    for (let i = 0; i < 6; i++) {
+      gameOverDuckFrames[i] = sheet.get(i * sw, gameOverLineY, sw, sh);
     }
   });
 
@@ -52,6 +67,16 @@ function draw() {
   if (!gameStarted) return;
 
   background(currentBg);
+
+  if (gameOver) {
+    player.draw();
+    if (mushroomEnemy) {
+      mushroomEnemy.draw();
+    }
+    drawWalls();
+    drawGameOverScreen();
+    return;
+  }
   
   // Faire clignoter le joueur s'il est invincible
   if (isInvincible && frameCount % 10 < 5) {
@@ -88,7 +113,7 @@ function draw() {
 // --- GESTION DES DÉGÂTS AVEC RECUL ---
 // --- GESTION DES DÉGÂTS (SANS RECUL + INVINCIBILITÉ ALLONGÉE) ---
 function takeDamage() {
-  if (isInvincible) return; 
+  if (isInvincible || gameOver) return; 
 
   health--;
   updateUI();
@@ -109,6 +134,13 @@ function takeDamage() {
   }
 }
 
+function handleGameOver() {
+  gameOver = true;
+  duckScrollX = -64;
+  gameOverDuckFrameIndex = 0;
+  gameOverDuckAnimTimer = 0;
+}
+
 // Fonction pour recommencer (à appeler via le bouton du Game Over)
 function restartGame() {
   health = 3;
@@ -116,6 +148,10 @@ function restartGame() {
   player.x = 180;
   player.y = 330;
   isInvincible = false;
+  gameOver = false;
+  duckScrollX = -64;
+  gameOverDuckFrameIndex = 0;
+  gameOverDuckAnimTimer = 0;
   
   const screen = document.getElementById('game-over-screen');
   if(screen) screen.classList.remove('active');
@@ -133,6 +169,41 @@ function updateUI() {
       heart.src = "assets/hp/hpV.png";
     }
   });
+}
+
+function drawGameOverScreen() {
+  noStroke();
+  fill(0, 0, 0, 185);
+  rect(0, 0, width, height);
+
+  const duckImg = gameOverDuckFrames[gameOverDuckFrameIndex] || gameOverDuckFrames[0] || player.sprites[0];
+  const duckSize = 56;
+  const duckSpeed = 2.2;
+  const duckY = height - duckSize - 24;
+
+  gameOverDuckAnimTimer++;
+  if (gameOverDuckAnimTimer >= 8) {
+    gameOverDuckAnimTimer = 0;
+    if (gameOverDuckFrames.length > 1) {
+      gameOverDuckFrameIndex = (gameOverDuckFrameIndex + 1) % gameOverDuckFrames.length;
+    }
+  }
+
+  duckScrollX += duckSpeed;
+  if (duckScrollX > width + duckSize) {
+    duckScrollX = -duckSize;
+  }
+
+  if (duckImg) {
+    image(duckImg, duckScrollX, duckY, duckSize, duckSize);
+  }
+
+  textAlign(CENTER, CENTER);
+  textSize(64);
+  fill(20, 20, 20, 240);
+  text('GAME OVER', width / 2 + 3, height / 2 + 3);
+  fill(235, 238, 242);
+  text('GAME OVER', width / 2, height / 2);
 }
 
 function showCoords() {
@@ -163,10 +234,17 @@ function startGame() {
     gameWrapper.classList.add('active');
     gameWrapper.setAttribute('aria-hidden', 'false');
   }
+  gameOver = false;
+  duckScrollX = -64;
+  gameOverDuckFrameIndex = 0;
+  gameOverDuckAnimTimer = 0;
   gameStarted = true;
   loop();
 }
 
 function keyPressed() {
+  if (!gameStarted || gameOver) {
+    return;
+  }
   player.handleKey(key, keyCode);
 }
