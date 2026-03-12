@@ -85,38 +85,27 @@ function draw() {
 }
 
 // --- GESTION DES DÉGÂTS AVEC RECUL ---
-// --- GESTION DES DÉGÂTS (SANS RECUL) ---
+// --- GESTION DES DÉGÂTS (SANS RECUL + INVINCIBILITÉ ALLONGÉE) ---
 function takeDamage() {
   if (isInvincible) return; 
 
   health--;
   updateUI();
 
-  // Joue le son quand on a mal
+  // Joue le son de douleur
   if (player.quackSound) player.quackSound.play();
 
-  // On a supprimé toute la logique de "knockbackForce" et de "constrain" sur player.x
-  // Le canard ne bouge plus de sa position actuelle.
-
-  // On active l'invincibilité pour ne pas perdre tous les PV d'un coup
+  // On active l'invincibilité
   isInvincible = true;
+
+  // On passe à 2000ms (2 secondes)
   setTimeout(() => { 
     isInvincible = false; 
-  }, 1000); 
+  }, 2000); 
 
   if (health <= 0) {
     handleGameOver();
   }
-}
-
-function handleGameOver() {
-  console.log("Game Over!");
-  gameStarted = false;
-  noLoop();
-  
-  // Affiche l'écran de Game Over HTML
-  const screen = document.getElementById('game-over-screen');
-  if(screen) screen.classList.add('active');
 }
 
 // Fonction pour recommencer (à appeler via le bouton du Game Over)
