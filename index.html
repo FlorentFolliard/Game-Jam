@@ -6,7 +6,6 @@
     <title>Duck Norris</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 </head>
 <body>
     <main class="home-screen" id="home-screen">
@@ -29,6 +28,12 @@
             
             </div>
     </section>
+
+    <div id="game-over-screen">
+        <img src="assets/GameOver/♥️♥️.jpg" id="screamer-img" alt="Screamer">
+        <div class="game-over-text">GAME OVER</div>
+        <button class="retry-button" onclick="restartGame()">RÉESSAYER</button>
+    </div>
 
     <script src="src/collisions.js"></script>
     <script src="src/map.js"></script>
