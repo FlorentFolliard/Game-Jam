@@ -11,7 +11,7 @@ const mushroomStartY = 300;
 const mushroomSwarmOffsets = [
   [-300, -200],
   [0, 0],
-  [300, -0]
+  [300, 0]
 ];
 
 function getMushroomSpawnCoords() {
