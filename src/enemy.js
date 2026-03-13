@@ -93,7 +93,7 @@ class Enemy {
     }
 
     // Debug Hitbox (tu peux mettre l'alpha à 0 pour cacher)
-    stroke(0, 255, 0, 50); 
+    stroke(0, 255, 0, 0); 
     noFill();
     rect(this.x, this.y, this.w, this.h);
   }
