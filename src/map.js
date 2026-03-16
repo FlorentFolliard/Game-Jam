@@ -69,7 +69,7 @@ function drawWalls() {
   // Astuce : Change le dernier chiffre (l'alpha) à 100 pour voir les rectangles en rose
   // fill(255, 0, 255, 100); 
   noStroke();
-  fill(255, 0, 255, 150); 
+  fill(255, 0, 255,0); 
   for (let w of currentWalls) {
     rect(w.x, w.y, w.w, w.h);
   }
