@@ -23,10 +23,14 @@ let portal = {
   h: 80,
   spritesApparition: [],
   spritesIdle: [],
+  spritesFermeture: [],
   frameIndex: 0,
   animTimer: 0,
   active: false,
-  appeared: false
+  appeared: false,
+  closingOnEntry: false,
+  closeFrameIndex: 0,
+  closeAnimTimer: 0
 };
 
 const mushroomStartX = 450;
@@ -46,11 +50,15 @@ function getMushroomSpawnCoords() {
 
 function resetPortalState() {
   if (getCurrentLevelName() === 'room2') {
-    portal.x = 10;
-    portal.y = 420;
+    portal.x = 5;
+    portal.y = 210;
+    portal.closingOnEntry = true;
+    portal.closeFrameIndex = 0;
+    portal.closeAnimTimer = 0;
   } else {
     portal.x = 820;
     portal.y = 55;
+    portal.closingOnEntry = false;
   }
   portal.active = false;
   portal.appeared = false;
@@ -108,6 +116,7 @@ function preload() {
     for (let i = 0; i < 8; i++) {
       portal.spritesIdle[i] = sheet.get(i * 64, 0, 64, 64);
       portal.spritesApparition[i] = sheet.get(i * 64, 64, 64, 64);
+      portal.spritesFermeture[i] = sheet.get(i * 64, 128, 64, 64);
     }
   });
 
@@ -166,6 +175,11 @@ function draw() {
     if (enemy.collidesWith(player) && !isInvincible) {
       takeDamage();
     }
+  }
+
+  if (portal.closingOnEntry) {
+    updatePortalClosingAnimation();
+    drawPortalClosing();
   }
 
   if (mushroomEnemies.length === 0) {
@@ -233,6 +247,23 @@ function updatePortalAnimation() {
 
 function drawPortal() {
   let img = portal.appeared ? portal.spritesIdle[portal.frameIndex] : portal.spritesApparition[portal.frameIndex];
+  if (img) image(img, portal.x, portal.y, portal.w, portal.h);
+}
+
+function updatePortalClosingAnimation() {
+  portal.closeAnimTimer++;
+  if (portal.closeAnimTimer > 6) {
+    portal.closeAnimTimer = 0;
+    portal.closeFrameIndex++;
+    if (portal.closeFrameIndex >= 8) {
+      portal.closingOnEntry = false;
+      portal.closeFrameIndex = 0;
+    }
+  }
+}
+
+function drawPortalClosing() {
+  let img = portal.spritesFermeture[portal.closeFrameIndex];
   if (img) image(img, portal.x, portal.y, portal.w, portal.h);
 }
 
