@@ -10,9 +10,13 @@ let gameOverDuckAnimTimer = 0;
 const levelOrder = ['room1', 'room2'];
 let currentLevelIndex = 0;
 
+// TEMPS
+let totalGameTime = 0;
+let levelStartTime = 0;
+let levelTimes = [];
+
 // PORTAIL
 let portal = {
-  // Coordonnées ajustées pour être bien visible à droite
   x: 820, 
   y: 55,
   w: 80,
@@ -35,12 +39,19 @@ function getCurrentLevelName() {
 
 function getMushroomSpawnCoords() {
   if (getCurrentLevelName() === 'room2') {
-    return [[140, 120], [410, 300], [730, 430]];
+    return [[200, 120], [410, 440], [550, 450], [550, 150]];
   }
   return mushroomSwarmOffsets.map(([dx, dy]) => [mushroomStartX + dx, mushroomStartY + dy]);
 }
 
 function resetPortalState() {
+  if (getCurrentLevelName() === 'room2') {
+    portal.x = 10;
+    portal.y = 420;
+  } else {
+    portal.x = 820;
+    portal.y = 55;
+  }
   portal.active = false;
   portal.appeared = false;
   portal.frameIndex = 0;
@@ -51,11 +62,22 @@ function loadCurrentLevel() {
   loadLevel(getCurrentLevelName());
   spawnMushroomSwarm(getMushroomSpawnCoords());
   resetPortalState();
-  player.x = 180;
-  player.y = 330;
+  levelStartTime = frameCount;
+
+  if (getCurrentLevelName() === 'room2') {
+    player.x = 5;
+    player.y = 210;
+  } else {
+    player.x = 180;
+    player.y = 330;
+  }
 }
 
 function goToNextLevel() {
+  let levelTime = frameCount - levelStartTime;
+  levelTimes.push(levelTime);
+  totalGameTime += levelTime;
+  
   if (currentLevelIndex >= levelOrder.length - 1) {
     gameWon = true;
     return;
@@ -68,7 +90,6 @@ function goToNextLevel() {
 function preload() {
   loadLevel(levelOrder[0]); 
   
-  // DUCK ANIMATION
   loadImage('./assets/personnage/Canards/ducky_3_spritesheet.png', (sheet) => {
     let sw = 32, sh = 32, lineY = 32; 
     for (let i = 0; i < 6; i++) {
@@ -76,7 +97,6 @@ function preload() {
     }
   });
 
-  // GAME OVER DUCK
   loadImage('./assets/personnage/Canards/ducky_2_spritesheet.png', (sheet) => {
     let sw = 32, sh = 32, lineY = 96;
     for (let i = 0; i < 6; i++) {
@@ -84,7 +104,6 @@ function preload() {
     }
   });
 
-  // PORTAIL
   loadImage('./assets/portals/purple_portal.png', (sheet) => {
     for (let i = 0; i < 8; i++) {
       portal.spritesIdle[i] = sheet.get(i * 64, 0, 64, 64);
@@ -123,8 +142,6 @@ function draw() {
   
   player.update();
 
-  // --- EFFET DE CLIGNOTEMENT (INVULNÉRABILITÉ) ---
-  // Si le joueur est invincible, on dessine une fois sur deux (modulo 10)
   if (isInvincible) {
     if (frameCount % 10 < 5) {
       player.draw();
@@ -133,7 +150,6 @@ function draw() {
     player.draw();
   }
   
-  // Ennemis
   for (let i = mushroomEnemies.length - 1; i >= 0; i--) {
     const enemy = mushroomEnemies[i];
     enemy.update();
@@ -152,7 +168,6 @@ function draw() {
     }
   }
 
-  // --- LOGIQUE DU PORTAIL ---
   if (mushroomEnemies.length === 0) {
     portal.active = true;
     updatePortalAnimation();
@@ -168,6 +183,36 @@ function draw() {
 
   drawWalls();
   showCoords();
+  
+  // ✅ SEULEMENT LE TEMPS TOTAL
+  let currentLevelTime = frameCount - levelStartTime;
+  let totalTimeFrame = totalGameTime + currentLevelTime;
+
+  drawTimeBox("Total: " + formatTime(totalTimeFrame), 20);
+  
+}
+
+// ✅ FIX DU BUG ICI
+function drawTimeBox(label, yPos) {
+  push();
+  
+  let boxHeight = 25;
+  let boxWidth = 140;
+  let boxX = width - boxWidth - 10;
+  let boxY = yPos - 5;
+  
+  fill(0, 0, 0, 180);
+  stroke(0, 0, 0);
+  strokeWeight(2);
+  rect(boxX, boxY, boxWidth, boxHeight, 5);
+  
+  noStroke();
+  fill(255, 255, 255);
+  textAlign(RIGHT, TOP);
+  textSize(16);
+  text(label, width - 15, yPos);
+  
+  pop();
 }
 
 function updatePortalAnimation() {
@@ -198,10 +243,7 @@ function takeDamage() {
   if (player.quackSound2) player.quackSound2.play();
   
   isInvincible = true;
-  // On remet isInvincible à false après 2 secondes
-  setTimeout(() => { 
-    isInvincible = false; 
-  }, 2000); 
+  setTimeout(() => { isInvincible = false; }, 2000); 
 
   if (health <= 0) handleGameOver();
 }
@@ -216,6 +258,8 @@ function restartGame() {
   currentLevelIndex = 0;
   gameWon = false;
   health = 3;
+  totalGameTime = 0;
+  levelTimes = [];
   updateUI();
   loadCurrentLevel();
   gameOver = false;
@@ -229,6 +273,13 @@ function updateUI() {
   hearts.forEach((heart, index) => {
     heart.src = index < health ? "assets/hp/hpP.png" : "assets/hp/hpV.png";
   });
+}
+
+function formatTime(frames) {
+  let totalMs = Math.floor((frames / 60) * 1000);
+  let seconds = Math.floor(totalMs / 1000);
+  let milliseconds = totalMs % 1000;
+  return String(seconds) + ':' + String(milliseconds).padStart(3, '0');
 }
 
 function drawGameOverScreen() {
@@ -246,9 +297,20 @@ function drawVictoryScreen() {
   textAlign(CENTER);
   textSize(42);
   fill(255);
-  text("VICTOIRE !", width / 2, height / 2 - 12);
+  text("VICTOIRE !", width / 2, height / 2 - 60);
   textSize(20);
-  text("Tu as termine tous les niveaux.", width / 2, height / 2 + 24);
+  text("Tu as termine tous les niveaux.", width / 2, height / 2);
+  
+  textSize(16);
+  let yOffset = height / 2 + 50;
+  for (let i = 0; i < levelTimes.length; i++) {
+    text(levelOrder[i].toUpperCase() + ": " + formatTime(levelTimes[i]), width / 2, yOffset);
+    yOffset += 30;
+  }
+  
+  textSize(18);
+  fill(255, 215, 0);
+  text("TEMPS TOTAL: " + formatTime(totalGameTime), width / 2, yOffset + 15);
 }
 
 function setupHomeScreen() {

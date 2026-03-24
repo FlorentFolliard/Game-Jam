@@ -1,0 +1,4 @@
+mauvaise apparition des monstres et du personnage + portail anniamtion 
+mettre le temps -> sys score
+portail de fin mauvaise endroit 
+ajout de choix du skin de canard 
