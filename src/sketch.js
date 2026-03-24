@@ -10,11 +10,6 @@ let gameOverDuckAnimTimer = 0;
 const levelOrder = ['room1', 'room2'];
 let currentLevelIndex = 0;
 
-// TEMPS
-let totalGameTime = 0;
-let levelStartTime = 0;
-let levelTimes = [];
-
 // PORTAIL
 let portal = {
   x: 820, 
@@ -22,6 +17,7 @@ let portal = {
   w: 80,
   h: 80,
   spritesApparition: [],
+  spritesFermeture: [],
   spritesIdle: [],
   frameIndex: 0,
   animTimer: 0,
@@ -58,19 +54,37 @@ function resetPortalState() {
   portal.animTimer = 0;
 }
 
-function loadCurrentLevel() {
+function applyCurrentLevelSettings() {
+  const levelName = getCurrentLevelName();
+  const settings = levelSettings[levelName];
+  if (!settings) return;
+
+  portal.x = settings.portalPos.x;
+  portal.y = settings.portalPos.y;
+}
+
+function placePlayerForLevelEntry(fromPortal = false) {
+  const levelName = getCurrentLevelName();
+  const settings = levelSettings[levelName];
+  if (!settings) return;
+
+  if (fromPortal && settings.playerSpawnFromPortal) {
+    player.x = settings.playerSpawnFromPortal.x;
+    player.y = settings.playerSpawnFromPortal.y;
+    return;
+  }
+
+  player.x = settings.playerSpawn.x;
+  player.y = settings.playerSpawn.y;
+}
+
+function loadCurrentLevel(fromPortal = false) {
   loadLevel(getCurrentLevelName());
+  applyCurrentLevelSettings();
   spawnMushroomSwarm(getMushroomSpawnCoords());
   resetPortalState();
-  levelStartTime = frameCount;
-
-  if (getCurrentLevelName() === 'room2') {
-    player.x = 5;
-    player.y = 210;
-  } else {
-    player.x = 180;
-    player.y = 330;
-  }
+  player.x = 180;
+  player.y = 330;
 }
 
 function goToNextLevel() {
@@ -84,7 +98,7 @@ function goToNextLevel() {
   }
 
   currentLevelIndex++;
-  loadCurrentLevel();
+  loadCurrentLevel(true);
 }
 
 function preload() {
@@ -108,6 +122,8 @@ function preload() {
     for (let i = 0; i < 8; i++) {
       portal.spritesIdle[i] = sheet.get(i * 64, 0, 64, 64);
       portal.spritesApparition[i] = sheet.get(i * 64, 64, 64, 64);
+      // 3e ligne du spritesheet (y = 128) = fermeture
+      portal.spritesFermeture[i] = sheet.get(i * 64, 128, 64, 64);
     }
   });
 
@@ -168,16 +184,21 @@ function draw() {
     }
   }
 
+  // --- LOGIQUE DU PORTAIL ---
   if (mushroomEnemies.length === 0) {
     portal.active = true;
-    updatePortalAnimation();
-    drawPortal();
-    
-    if (portal.appeared) {
-      let hb = player.getHurtbox();
-      if (rectCollide(hb.x, hb.y, hb.w, hb.h, portal.x, portal.y, portal.w, portal.h)) {
-        goToNextLevel();
-      }
+    shouldDrawPortal = true;
+  }
+
+  if (shouldDrawPortal) {
+    updatePortalAnimation(useClosingAnim);
+    drawPortal(useClosingAnim);
+  }
+
+  if (mushroomEnemies.length === 0 && portal.appeared) {
+    let hb = player.getHurtbox();
+    if (rectCollide(hb.x, hb.y, hb.w, hb.h, portal.x, portal.y, portal.w, portal.h)) {
+      goToNextLevel();
     }
   }
 
@@ -215,7 +236,18 @@ function drawTimeBox(label, yPos) {
   pop();
 }
 
-function updatePortalAnimation() {
+function updatePortalAnimation(useClosingAnim = false) {
+  if (useClosingAnim) {
+    portal.animTimer++;
+    if (portal.animTimer > 6) {
+      portal.animTimer = 0;
+      if (portal.frameIndex < 7) {
+        portal.frameIndex++;
+      }
+    }
+    return;
+  }
+
   portal.animTimer++;
   if (portal.animTimer > 6) {
     portal.animTimer = 0;
@@ -231,8 +263,13 @@ function updatePortalAnimation() {
   }
 }
 
-function drawPortal() {
-  let img = portal.appeared ? portal.spritesIdle[portal.frameIndex] : portal.spritesApparition[portal.frameIndex];
+function drawPortal(useClosingAnim = false) {
+  let img;
+  if (useClosingAnim) {
+    img = portal.spritesFermeture[portal.frameIndex];
+  } else {
+    img = portal.appeared ? portal.spritesIdle[portal.frameIndex] : portal.spritesApparition[portal.frameIndex];
+  }
   if (img) image(img, portal.x, portal.y, portal.w, portal.h);
 }
 
