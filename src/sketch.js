@@ -407,3 +407,10 @@ function showCoords() {
   
   pop(); // 3. On "restaure" l'état précédent pour ne pas casser le reste du jeu
 }
+
+// Empêche le défilement de la page avec les flèches et la barre espace
+window.addEventListener("keydown", function(e) {
+    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+        e.preventDefault();
+    }
+}, false);
