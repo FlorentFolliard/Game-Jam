@@ -159,7 +159,9 @@ function draw() {
     player.draw();
   }
 
+  // ✅ Vérification des dégâts
   checkCactusDamage();
+  checkWallDamage(); // Nouvelle fonction appelée ici
   
   for (let i = mushroomEnemies.length - 1; i >= 0; i--) {
     const enemy = mushroomEnemies[i];
@@ -200,12 +202,17 @@ function draw() {
   drawWalls();
   showCoords();
   
-  // ✅ SEULEMENT LE TEMPS TOTAL
   let currentLevelTime = frameCount - levelStartTime;
   let totalTimeFrame = totalGameTime + currentLevelTime;
-
   drawTimeBox("Total: " + formatTime(totalTimeFrame), 20);
-  
+}
+
+// ✅ Nouvelle fonction pour gérer les dégâts des murs
+function checkWallDamage() {
+  if (isInvincible || gameOver) return;
+  if (player.isTouchingWall()) {
+    takeDamage();
+  }
 }
 
 function checkCactusDamage() {
@@ -220,26 +227,21 @@ function checkCactusDamage() {
   }
 }
 
-// ✅ FIX DU BUG ICI
 function drawTimeBox(label, yPos) {
   push();
-  
   let boxHeight = 25;
   let boxWidth = 140;
   let boxX = width - boxWidth - 10;
   let boxY = yPos - 5;
-  
   fill(0, 0, 0, 180);
   stroke(0, 0, 0);
   strokeWeight(2);
   rect(boxX, boxY, boxWidth, boxHeight, 5);
-  
   noStroke();
   fill(255, 255, 255);
   textAlign(RIGHT, TOP);
   textSize(16);
   text(label, width - 15, yPos);
-  
   pop();
 }
 
@@ -288,6 +290,7 @@ function takeDamage() {
   if (player.quackSound2) player.quackSound2.play();
   
   isInvincible = true;
+  // Le canard clignote et devient insensible pendant 2 secondes
   setTimeout(() => { isInvincible = false; }, 2000); 
 
   if (health <= 0) handleGameOver();
@@ -379,5 +382,6 @@ function keyPressed() {
 
 function showCoords() {
   fill(255, 0, 180, 100);
+  textAlign(CENTER);
   text(`X: ${floor(mouseX)} Y: ${floor(mouseY)}`, width - 100, height - 20);
 }
