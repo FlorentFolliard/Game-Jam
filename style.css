@@ -41,7 +41,8 @@ body {
 
 .play-button {
     border: 0;
-    background: transparent;
+    background: #243242;
+    border-radius: 12px;
     padding: 0;
     cursor: pointer;
     transition: transform 0.15s ease;

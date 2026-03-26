@@ -51,7 +51,7 @@ function getMushroomSpawnCoords() {
 function resetPortalState() {
   if (getCurrentLevelName() === 'room2') {
     portal.x = 5;
-    portal.y = 210;
+    portal.y = 100;
     portal.closingOnEntry = true;
     portal.closeFrameIndex = 0;
     portal.closeAnimTimer = 0;
@@ -74,7 +74,7 @@ function loadCurrentLevel() {
 
   if (getCurrentLevelName() === 'room2') {
     player.x = 5;
-    player.y = 210;
+    player.y = 100;
   } else {
     player.x = 180;
     player.y = 330;
