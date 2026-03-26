@@ -49,6 +49,7 @@ let player = {
     };
   },
 
+  //fonction d'attaque qui prend en compte la direction dans laquelle regarde le canard
   attack: function() {
     if (this.isAttacking || this.attackCooldownTimer > 0) return;
     this.isAttacking = true;
@@ -65,6 +66,7 @@ let player = {
     }
   },
 
+// Affectation des touches pour jouer
   handleKey: function(k, kc) {
     if (k === ' ' || kc === 32) { this.attack(); return; }
     if (kc === LEFT_ARROW || k === 'a' || k === 'A') this.lastDirection = 'left';

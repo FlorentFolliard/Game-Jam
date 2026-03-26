@@ -1,4 +1,4 @@
-// map.js - Fichier entier
+// Création des hitbox fixes de la map
 
 const levels = {
   room1: {
@@ -54,6 +54,7 @@ let currentWalls = [];
 let currentBg;
 let currentCactusHazards = [];
 
+// Chargement du level
 function loadLevel(levelName) {
   const level = levels[levelName];
   if (level) {
@@ -66,17 +67,15 @@ function loadLevel(levelName) {
   }
 }
 
+//Couleur des hitbox (ici transparent)
 function drawWalls() {
   noStroke();
 
-  // 1. SURBRILLANCE DES MURS (Bleu/Violet transparent)
   fill(0, 0, 255, 0); 
   for (let w of currentWalls) {
     rect(w.x, w.y, w.w, w.h);
   }
 
-  // 2. SURBRILLANCE DES CACTUS / ZONES DE DÉGÂTS (Orange/Rouge vif)
-  // On met un alpha plus élevé pour bien les voir
   fill(255, 100, 0, 0); 
   for (let c of currentCactusHazards) {
     rect(c.x, c.y, c.w, c.h);

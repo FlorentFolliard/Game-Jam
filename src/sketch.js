@@ -37,18 +37,18 @@ let portal = {
 const mushroomStartX = 450;
 const mushroomStartY = 300;
 const mushroomSwarmOffsets = [[-300, -200], [0, 0], [300, 0]];
-
+// Recupération du niveau actuel
 function getCurrentLevelName() {
   return levelOrder[currentLevelIndex];
 }
-
+// Spawns ennemis de la 2e room
 function getMushroomSpawnCoords() {
   if (getCurrentLevelName() === 'room2') {
     return [[200, 120], [410, 440], [550, 450], [550, 150]];
   }
   return mushroomSwarmOffsets.map(([dx, dy]) => [mushroomStartX + dx, mushroomStartY + dy]);
 }
-
+// Emplacement des portails
 function resetPortalState() {
   if (getCurrentLevelName() === 'room2') {
     portal.x = 5;
@@ -67,7 +67,7 @@ function resetPortalState() {
   portal.animTimer = 0;
   portal.repositionedForEnemiesCleared = false;
 }
-
+// Chargement des niveaux avec le spawn du personnage
 function loadCurrentLevel() {
   loadLevel(getCurrentLevelName());
   spawnMushroomSwarm(getMushroomSpawnCoords());
@@ -82,7 +82,7 @@ function loadCurrentLevel() {
     player.y = 330;
   }
 }
-
+// Changement de niveau lors du passage dans le portail
 function goToNextLevel() {
   let levelTime = frameCount - levelStartTime;
   levelTimes.push(levelTime);
@@ -96,7 +96,7 @@ function goToNextLevel() {
   currentLevelIndex++;
   loadCurrentLevel();
 }
-
+// Chargement des assets dans le pré-chargement
 function preload() {
   loadLevel(levelOrder[0]); 
   
@@ -136,14 +136,14 @@ function preload() {
     player.quackSound2 = new Audio('./sound/Saturated_quack.mp3');
   } catch (e) { console.warn("Audio non chargé"); }
 }
-
+// Paramètres du canvas
 function setup() {
   const canvas = createCanvas(900, 600);
   canvas.parent('game-container');
   setupHomeScreen();
   noLoop();
 }
-
+// fonction qui vérifie constamment l'état actuel du jeu
 function draw() {
   if (!gameStarted) return;
   background(currentBg);
@@ -232,7 +232,7 @@ function checkWallDamage() {
     takeDamage();
   }
 }
-
+// Dégats ajoutés à la collision avec cactus
 function checkCactusDamage() {
   if (!currentCactusHazards || currentCactusHazards.length === 0 || isInvincible || gameOver) return;
 
@@ -244,7 +244,7 @@ function checkCactusDamage() {
     }
   }
 }
-
+// Infos du temps actuel du speedrun
 function drawTimeBox(label, yPos) {
   push();
   let boxHeight = 25;
@@ -262,7 +262,7 @@ function drawTimeBox(label, yPos) {
   text(label, width - 15, yPos);
   pop();
 }
-
+// animation de l'apparition du portail
 function updatePortalAnimation() {
   portal.animTimer++;
   if (portal.animTimer > 6) {
@@ -278,12 +278,12 @@ function updatePortalAnimation() {
     }
   }
 }
-
+// animation du portail idle 
 function drawPortal() {
   let img = portal.appeared ? portal.spritesIdle[portal.frameIndex] : portal.spritesApparition[portal.frameIndex];
   if (img) image(img, portal.x, portal.y, portal.w, portal.h);
 }
-
+// animation de la fermeture du portail
 function updatePortalClosingAnimation() {
   portal.closeAnimTimer++;
   if (portal.closeAnimTimer > 6) {
@@ -300,7 +300,7 @@ function drawPortalClosing() {
   let img = portal.spritesFermeture[portal.closeFrameIndex];
   if (img) image(img, portal.x, portal.y, portal.w, portal.h);
 }
-
+// Gestion des dégats sur la vie et le game over
 function takeDamage() {
   if (isInvincible || gameOver) return; 
   health--;
@@ -313,13 +313,13 @@ function takeDamage() {
 
   if (health <= 0) handleGameOver();
 }
-
+// Ecran game over
 function handleGameOver() {
   gameOver = true;
   const screen = document.getElementById('game-over-screen');
   if (screen) screen.classList.add('active');
 }
-
+// possibilité de restart la game
 function restartGame() {
   currentLevelIndex = 0;
   gameWon = false;
@@ -334,21 +334,21 @@ function restartGame() {
   if (screen) screen.classList.remove('active');
   loop();
 }
-
+// visuel des points de vie
 function updateUI() {
   let hearts = document.querySelectorAll('.hp-point');
   hearts.forEach((heart, index) => {
     heart.src = index < health ? "assets/hp/hpP.png" : "assets/hp/hpV.png";
   });
 }
-
+// variables de temps sur le chronomètre
 function formatTime(frames) {
   let totalMs = Math.floor((frames / 60) * 1000);
   let seconds = Math.floor(totalMs / 1000);
   let milliseconds = totalMs % 1000;
   return String(seconds) + ':' + String(milliseconds).padStart(3, '0');
 }
-
+// contenu de l'écran game over
 function drawGameOverScreen() {
   fill(0, 0, 0, 150);
   rect(0, 0, width, height);
@@ -357,7 +357,7 @@ function drawGameOverScreen() {
   fill(255);
   text("GAME OVER", width/2, height/2);
 }
-
+// contenu de l'ecran de victoire 
 function drawVictoryScreen() {
   fill(0, 0, 0, 150);
   rect(0, 0, width, height);
@@ -383,12 +383,12 @@ function drawVictoryScreen() {
   fill(255);
   text('Appuyer sur "R" pour recommencer', width / 2, yOffset + 45);
 }
-
+// Menu du jeu
 function setupHomeScreen() {
   const btn = document.getElementById('play-button');
   if (btn) btn.onclick = startGame;
 }
-
+// Paramètres de base quand on commence une game
 function startGame() {
   document.getElementById('home-screen').style.display = 'none';
   document.getElementById('game-wrapper').classList.add('active');
@@ -407,7 +407,7 @@ function startGame() {
   gameStarted = true;
   loop();
 }
-
+// affectation de la touche pour recommencer la run
 function keyPressed() {
   if (gameStarted && (key === 'r' || key === 'R')) {
     restartGame();
@@ -416,12 +416,12 @@ function keyPressed() {
 
   if (gameStarted && !gameOver && !gameWon) player.handleKey(key, keyCode);
 }
-
+// Coordonnées en bas
 function showCoords() {
   push(); // 1. On "sauvegarde" l'état du dessin (couleurs, tailles, alignements)
   
   // 2. On définit des réglages spécifiques uniquement pour cette fonction
-  fill(255, 0, 180, 200);
+  fill(255, 0, 180, 0);
   noStroke();
   textSize(14); // <--- On force une petite taille ici !
   textAlign(CENTER, BOTTOM); 
