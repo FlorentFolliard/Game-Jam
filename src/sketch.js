@@ -381,7 +381,18 @@ function keyPressed() {
 }
 
 function showCoords() {
-  fill(255, 0, 180, 100);
-  textAlign(CENTER);
-  text(`X: ${floor(mouseX)} Y: ${floor(mouseY)}`, width - 100, height - 20);
+  push(); // 1. On "sauvegarde" l'état du dessin (couleurs, tailles, alignements)
+  
+  // 2. On définit des réglages spécifiques uniquement pour cette fonction
+  fill(255, 0, 180, 200);
+  noStroke();
+  textSize(14); // <--- On force une petite taille ici !
+  textAlign(CENTER, BOTTOM); 
+  
+  let txt = `X: ${floor(mouseX)} Y: ${floor(mouseY)}`;
+  
+  // On le place au centre horizontal, à 10px du bas
+  text(txt, width / 2, height - 10);
+  
+  pop(); // 3. On "restaure" l'état précédent pour ne pas casser le reste du jeu
 }
