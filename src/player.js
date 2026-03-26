@@ -27,17 +27,25 @@ let player = {
   attackStartY: null,
   attackHitbox: null,
 
-  // Tolérance pour la collision mortelle
-  margeCotes: 12,  
-  margeHaut: 18,   
-  margeBas: 6,
+  // --- REGLAGES DES COLLISIONS ---
+  
+  // 1. Zone de dégâts (Hurtbox) : On la veut un peu LARGE pour être sûr qu'elle touche le mur
+  margeCotesHurt: 8,  
+  margeHautHurt: 24, // ✅ CORRECTION ICI : Augmenté pour exclure la tête de la zone de dégâts ( perspective )
+  margeBasHurt: 4,
 
+  // 2. Zone de blocage (Pieds) : On la veut plus ETROITE pour que le corps dépasse
+  margeCotesFeet: 14, 
+  margeHautFeet: 39, // ✅ CORRECTION ICI : L'OFFSET Y reste haut pour bloquer aux pieds
+  margeBasFeet: 2,
+
+  // Retourne le rectangle du CORPS (pour les dégâts)
   getHurtbox: function() {
     return {
-      x: this.x + this.margeCotes,
-      y: this.y + this.margeHaut,
-      w: this.w - (this.margeCotes * 2),
-      h: this.h - this.margeHaut - this.margeBas
+      x: this.x + this.margeCotesHurt,
+      y: this.y + this.margeHautHurt, // ✅ La Hurtbox commence plus bas maintenant
+      w: this.w - (this.margeCotesHurt * 2),
+      h: this.h - this.margeHautHurt - this.margeBasHurt
     };
   },
 
@@ -53,11 +61,7 @@ let player = {
     this.attackHitbox = this.getAttackHitbox();
 
     if (this.quackSound && typeof this.quackSound.play === 'function') {
-      try {
-        this.quackSound.play();
-      } catch (e) {
-        console.warn('Impossible de jouer le quack:', e);
-      }
+      try { this.quackSound.play(); } catch (e) { console.warn('Quack error'); }
     }
   },
 
@@ -79,10 +83,18 @@ let player = {
     if (keyIsDown(UP_ARROW) || keyIsDown(87)) { nextY -= this.speed; this.isMoving = true; this.lastDirection = 'up'; }
     if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) { nextY += this.speed; this.isMoving = true; this.lastDirection = 'down'; }
 
-    // On utilise une petite zone au pied du canard pour les collisions bloquantes
-    if (!this.checkWallCollision(nextX + 6, this.y + 39, 36, 8)) this.x = nextX;
-    if (!this.checkWallCollision(this.x + 6, nextY + 39, 36, 8)) this.y = nextY;
+    // On teste le blocage avec la zone des PIEDS (plus étroite que le corps)
+    let feetW = this.w - (this.margeCotesFeet * 2);
+    let feetH = this.h - this.margeHautFeet - this.margeBasFeet;
 
+    if (!this.checkWallCollision(nextX + this.margeCotesFeet, this.y + this.margeHautFeet, feetW, feetH)) {
+      this.x = nextX;
+    }
+    if (!this.checkWallCollision(this.x + this.margeCotesFeet, nextY + this.margeHautFeet, feetW, feetH)) {
+      this.y = nextY;
+    }
+
+    // Animation
     if (this.isMoving && this.sprites.length > 0) {
       this.animTimer++;
       if (this.animTimer > 8) {
@@ -97,29 +109,23 @@ let player = {
 
     if (this.isAttacking) {
       this.attackTimer++;
-      if (this.attackTimer <= this.attackHitboxDuration) {
-        this.attackHitbox = this.getAttackHitbox();
-      } else {
-        this.attackHitbox = null;
-      }
-      if (this.attackTimer >= this.attackVisualDuration) {
-        this.isAttacking = false;
-        this.attackTimer = 0;
-      }
+      if (this.attackTimer <= this.attackHitboxDuration) this.attackHitbox = this.getAttackHitbox();
+      else this.attackHitbox = null;
+      if (this.attackTimer >= this.attackVisualDuration) { this.isAttacking = false; this.attackTimer = 0; }
     }
   },
 
-  // Cette fonction vérifie si une zone donnée (nx, ny, nw, nh) touche un mur
   checkWallCollision: function(nx, ny, nw, nh) {
+    if (typeof currentWalls === 'undefined' || !currentWalls) return false;
     for (let w of currentWalls) {
       if (rectCollide(nx, ny, nw, nh, w.x, w.y, w.w, w.h)) return true;
     }
     return false;
   },
 
-  // Nouvelle méthode pour vérifier si le corps du joueur touche un mur (pour les dégâts)
   isTouchingWall: function() {
     let hb = this.getHurtbox();
+    // On vérifie si le CORPS touche les murs
     return this.checkWallCollision(hb.x, hb.y, hb.w, hb.h);
   },
 
@@ -143,20 +149,31 @@ let player = {
       pop();
     }
 
-    if (this.isAttacking) {
+    // --- DEBUG VISUEL ---
+    // Décommente les lignes ci-dessous pour VOIR les zones si ça ne marche toujours pas
+    /*
+    noFill();
+    stroke(255, 0, 0); // ROUGE = Zone de dégâts (Hurtbox)
+    let hb = this.getHurtbox();
+    rect(hb.x, hb.y, hb.w, hb.h);
+    
+    stroke(0, 0, 255); // BLEU = Zone de blocage (Pieds)
+    let fW = this.w - (this.margeCotesFeet * 2);
+    let fH = this.h - this.margeHautFeet - this.margeBasFeet;
+    rect(this.x + this.margeCotesFeet, this.y + this.margeHautFeet, fW, fH);
+    */
+
+    if (this.isAttacking && this.attackSprite) {
       let offsetX = 0, offsetY = 0, angle = 0;
       if (this.attackDirection === 'left') { offsetX = -this.w; angle = 270; }
       else if (this.attackDirection === 'right') { offsetX = this.w; angle = 90; }
       else if (this.attackDirection === 'up') { offsetY = -this.h; angle = 0; }
       else if (this.attackDirection === 'down') { offsetY = this.h; angle = 180; }
-
-      if (this.attackSprite) {
-        push();
-        translate(this.attackStartX + this.w / 2 + offsetX, this.attackStartY + this.h / 2 + offsetY);
-        rotate(radians(angle));
-        image(this.attackSprite, -this.w / 2, -this.h / 2, this.w, this.h);
-        pop();
-      }
+      push();
+      translate(this.attackStartX + this.w / 2 + offsetX, this.attackStartY + this.h / 2 + offsetY);
+      rotate(radians(angle));
+      image(this.attackSprite, -this.w / 2, -this.h / 2, this.w, this.h);
+      pop();
     }
 
     if (this.attackCooldownTimer > 0) {
