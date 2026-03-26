@@ -70,3 +70,5 @@ README.md
 style.css
 ```
 </details>
+
+*Ce projet a été réalisé avec l'aide d'outils de LLMs.*
